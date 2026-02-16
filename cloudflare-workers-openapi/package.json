@@ -1,0 +1,44 @@
+{
+	"name": "cloudflare-workers-openapi",
+	"version": "1.0.0",
+	"private": true,
+	"scripts": {
+		"deploy": "wrangler deploy",
+		"dev": "wrangler dev",
+		"start": "wrangler dev",
+		"lint": "oxlint src",
+		"lint:fix": "oxlint --fix src",
+		"check": "tsgo --noEmit",
+		"typecheck:coverage": "type-coverage -p tsconfig.json --at-least 100 --ignore-files \"**/*.test.ts\"",
+		"test": "vitest run",
+		"test:unit": "vitest run --coverage",
+		"test:watch": "vitest",
+		"cov:html": "vitest run --coverage --coverage.reporter=html",
+		"cov:lcov": "vitest run --coverage --coverage.reporter=lcov"
+	},
+	"dependencies": {
+		"@hono/swagger-ui": "^0.5.3",
+		"@hono/zod-openapi": "^1.2.0",
+		"drizzle-orm": "^0.36.0",
+		"hono": "^4.6.0",
+		"webmention-handler": "^0.0.9",
+		"webmentions-handler-drizzle": "workspace:*",
+		"zod": "^4.3.6"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20241218.0",
+		"@types/better-sqlite3": "^7.6.11",
+		"@types/node": "^22.10.2",
+		"@typescript/native-preview": "^7.0.0-dev",
+		"@vitest/coverage-v8": "^2.1.8",
+		"better-sqlite3": "^11.7.0",
+		"drizzle-kit": "^0.30.0",
+		"miniflare": "^4.20260120.0",
+		"oxlint": "^1.0.0",
+		"oxlint-tsgolint": "^0.10.0",
+		"type-coverage": "^2.29.7",
+		"typescript": "^5.9.3",
+		"vitest": "^2.1.8",
+		"wrangler": "^4.61.1"
+	}
+}

@@ -1,7 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import * as index from './index';
 import { DrizzleWebMentionStorage } from './drizzle-webmention-storage.class';
-import { mentions, pendingMentions, createPostgresSchema, createMySQLSchema } from './schema';
+import {
+  mentions,
+  pendingMentions,
+  createPostgresSchema,
+  createMySQLSchema,
+} from './schema';
 
 describe('index exports', () => {
   it('exports DrizzleWebMentionStorage', () => {

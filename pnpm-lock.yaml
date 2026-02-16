@@ -106,6 +106,9 @@ importers:
         specifier: ^0.0.9
         version: 0.0.9
     devDependencies:
+      '@types/better-sqlite3':
+        specifier: ^7.6.11
+        version: 7.6.13
       '@typescript/native-preview':
         specifier: ^7.0.0-dev
         version: 7.0.0-dev.20260118.1

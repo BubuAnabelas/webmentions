@@ -42,7 +42,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "drizzle-orm": "^0.36.0",
+    "drizzle-orm": "^0.45.1",
     "webmention-handler": "^0.0.9"
   },
   "devDependencies": {

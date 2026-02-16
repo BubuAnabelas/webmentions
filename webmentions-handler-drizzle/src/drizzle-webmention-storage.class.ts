@@ -17,19 +17,19 @@ type QueryBuilderWithLimit = {
 
 type AnyDrizzleDb = {
   insert: <T extends typeof mentions | typeof pendingMentions>(
-    table: T
+    table: T,
   ) => {
     values: (values: Record<string, unknown>) => Promise<unknown>;
   };
   select: () => {
     from: <T extends typeof mentions | typeof pendingMentions>(
-      table: T
+      table: T,
     ) => {
       where: (condition: unknown) => QueryBuilderWithLimit;
     };
   };
   update: <T extends typeof mentions | typeof pendingMentions>(
-    table: T
+    table: T,
   ) => {
     set: (values: Record<string, unknown>) => {
       where: (condition: unknown) => Promise<unknown>;
@@ -75,7 +75,7 @@ export class DrizzleWebMentionStorage implements IWebMentionStorage {
       .limit(this.maxPendingFetch);
 
     const ids = (mentionsList as Array<{ id: number }>).map(
-      (mention) => mention.id
+      (mention) => mention.id,
     );
     if (ids.length > 0) {
       await this.dbEngine

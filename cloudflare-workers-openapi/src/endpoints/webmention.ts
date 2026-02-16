@@ -153,7 +153,7 @@ webmentionRoutes.openapi(
 			}
 
 			const storageHandler = new DrizzleWebMentionStorage(
-				db,
+				db as never,
 				mentions,
 				pendingMentions
 			);
@@ -178,7 +178,7 @@ webmentionRoutes.openapi(
 				for (const [name, value] of Object.entries(recommendedResponse.headers)) {
 					headers.set(name, value);
 				}
-				return new Response(res.body, { status, headers });
+				return new Response(res.body, { status, headers }) as never;
 			}
 			return res;
 		} catch (error) {

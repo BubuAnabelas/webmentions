@@ -29,8 +29,6 @@ function createTestDb() {
   return { db, sqlite };
 }
 
-
-
 describe('DrizzleWebMentionStorage', () => {
   let db: ReturnType<typeof createTestDb>['db'];
   let sqlite: ReturnType<typeof createTestDb>['sqlite'];
@@ -46,14 +44,22 @@ describe('DrizzleWebMentionStorage', () => {
   });
 
   it('constructor initializes correctly', () => {
-    const storage = new DrizzleWebMentionStorage(db as any, mentions, pendingMentions);
+    const storage = new DrizzleWebMentionStorage(
+      db as any,
+      mentions,
+      pendingMentions,
+    );
 
     expect(storage.maxPendingFetch).toBe(5);
     expect(storage.limitMentionsPerPageFetch).toBe(50);
   });
 
   it('addPendingMention adds a pending mention', async () => {
-    const storage = new DrizzleWebMentionStorage(db as any, mentions, pendingMentions);
+    const storage = new DrizzleWebMentionStorage(
+      db as any,
+      mentions,
+      pendingMentions,
+    );
 
     const mention: SimpleMention = {
       source: 'https://example.com/post1',
@@ -68,7 +74,11 @@ describe('DrizzleWebMentionStorage', () => {
   });
 
   it('getNextPendingMentions returns and marks pending mentions as processed', async () => {
-    const storage = new DrizzleWebMentionStorage(db as any, mentions, pendingMentions);
+    const storage = new DrizzleWebMentionStorage(
+      db as any,
+      mentions,
+      pendingMentions,
+    );
 
     // Add some pending mentions
     await storage.addPendingMention({
@@ -92,7 +102,11 @@ describe('DrizzleWebMentionStorage', () => {
   });
 
   it('getMentionsForPage returns mentions for a specific page', async () => {
-    const storage = new DrizzleWebMentionStorage(db as any, mentions, pendingMentions);
+    const storage = new DrizzleWebMentionStorage(
+      db as any,
+      mentions,
+      pendingMentions,
+    );
 
     const mention: Mention = {
       source: 'https://example.com/post1',
@@ -103,7 +117,9 @@ describe('DrizzleWebMentionStorage', () => {
 
     await storage.storeMentionForPage('https://example.org/target1', mention);
 
-    const result = await storage.getMentionsForPage('https://example.org/target1');
+    const result = await storage.getMentionsForPage(
+      'https://example.org/target1',
+    );
 
     expect(result.length).toBe(1);
     expect(result[0].source).toBe(mention.source);
@@ -111,7 +127,11 @@ describe('DrizzleWebMentionStorage', () => {
   });
 
   it('getMentionsForPage filters by type when provided', async () => {
-    const storage = new DrizzleWebMentionStorage(db as any, mentions, pendingMentions);
+    const storage = new DrizzleWebMentionStorage(
+      db as any,
+      mentions,
+      pendingMentions,
+    );
 
     const replyMention: Mention = {
       source: 'https://example.com/post1',
@@ -127,20 +147,36 @@ describe('DrizzleWebMentionStorage', () => {
       parsed: new Date(),
     };
 
-    await storage.storeMentionForPage('https://example.org/target1', replyMention);
-    await storage.storeMentionForPage('https://example.org/target1', likeMention);
+    await storage.storeMentionForPage(
+      'https://example.org/target1',
+      replyMention,
+    );
+    await storage.storeMentionForPage(
+      'https://example.org/target1',
+      likeMention,
+    );
 
-    const replies = await storage.getMentionsForPage('https://example.org/target1', 'reply');
+    const replies = await storage.getMentionsForPage(
+      'https://example.org/target1',
+      'reply',
+    );
     expect(replies.length).toBe(1);
     expect(replies[0].type).toBe('reply');
 
-    const likes = await storage.getMentionsForPage('https://example.org/target1', 'like');
+    const likes = await storage.getMentionsForPage(
+      'https://example.org/target1',
+      'like',
+    );
     expect(likes.length).toBe(1);
     expect(likes[0].type).toBe('like');
   });
 
   it('storeMentionForPage stores a mention', async () => {
-    const storage = new DrizzleWebMentionStorage(db as any, mentions, pendingMentions);
+    const storage = new DrizzleWebMentionStorage(
+      db as any,
+      mentions,
+      pendingMentions,
+    );
 
     const mention: Mention = {
       source: 'https://example.com/post1',
@@ -149,7 +185,10 @@ describe('DrizzleWebMentionStorage', () => {
       parsed: new Date(),
     };
 
-    const result = await storage.storeMentionForPage('https://example.org/target1', mention);
+    const result = await storage.storeMentionForPage(
+      'https://example.org/target1',
+      mention,
+    );
 
     expect(result.source).toBe(mention.source);
     expect(result.target).toBe(mention.target);
@@ -157,7 +196,11 @@ describe('DrizzleWebMentionStorage', () => {
   });
 
   it('deleteMention returns null', async () => {
-    const storage = new DrizzleWebMentionStorage(db as any, mentions, pendingMentions);
+    const storage = new DrizzleWebMentionStorage(
+      db as any,
+      mentions,
+      pendingMentions,
+    );
 
     const mention: SimpleMention = {
       source: 'https://example.com/post1',
@@ -192,7 +235,7 @@ describe('DrizzleWebMentionStorage', () => {
     const storageWithMockDb = new DrizzleWebMentionStorage(
       mockDb as any,
       mentions,
-      pendingMentions
+      pendingMentions,
     );
 
     const mention: Mention = {
@@ -203,7 +246,10 @@ describe('DrizzleWebMentionStorage', () => {
     };
 
     await expect(
-      storageWithMockDb.storeMentionForPage('https://example.org/target1', mention)
+      storageWithMockDb.storeMentionForPage(
+        'https://example.org/target1',
+        mention,
+      ),
     ).rejects.toThrow('Could not find Mention after insertion');
   });
 });

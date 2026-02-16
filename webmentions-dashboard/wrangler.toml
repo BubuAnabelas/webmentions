@@ -1,0 +1,23 @@
+name = "webmentions-dashboard"
+main = "src/index.ts"
+compatibility_date = "2026-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "webmentions"
+database_id = "2f6c4d8a-892b-41f3-8e02-b0e6e29d98c8"
+
+[triggers]
+crons = ["0 */6 * * *"]
+
+# Staging (shares D1 with webmentions-worker-staging)
+[env.staging]
+name = "webmentions-dashboard-staging"
+
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "webmentions-staging"
+database_id = "c947c4b9-b091-42bb-a875-ff3370680523"
+
+[env.staging.triggers]
+crons = ["0 */6 * * *"]

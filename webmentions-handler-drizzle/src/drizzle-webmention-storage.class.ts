@@ -15,7 +15,7 @@ type QueryBuilderWithLimit = {
   limit: (count: number) => Promise<unknown[]>;
 };
 
-type AnyDrizzleDb = {
+export type AnyDrizzleDb = {
   insert: <T extends typeof mentions | typeof pendingMentions>(
     table: T,
   ) => {

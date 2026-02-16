@@ -1,7 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
-import { DrizzleWebMentionStorage } from './drizzle-webmention-storage.class';
+import {
+  DrizzleWebMentionStorage,
+  type AnyDrizzleDb,
+} from './drizzle-webmention-storage.class';
 import { mentions, pendingMentions } from './schema';
 import type { SimpleMention, Mention } from 'webmention-handler';
 
@@ -45,7 +48,7 @@ describe('DrizzleWebMentionStorage', () => {
 
   it('constructor initializes correctly', () => {
     const storage = new DrizzleWebMentionStorage(
-      db as any,
+      db as AnyDrizzleDb,
       mentions,
       pendingMentions,
     );
@@ -56,7 +59,7 @@ describe('DrizzleWebMentionStorage', () => {
 
   it('addPendingMention adds a pending mention', async () => {
     const storage = new DrizzleWebMentionStorage(
-      db as any,
+      db as AnyDrizzleDb,
       mentions,
       pendingMentions,
     );
@@ -75,7 +78,7 @@ describe('DrizzleWebMentionStorage', () => {
 
   it('getNextPendingMentions returns and marks pending mentions as processed', async () => {
     const storage = new DrizzleWebMentionStorage(
-      db as any,
+      db as AnyDrizzleDb,
       mentions,
       pendingMentions,
     );
@@ -103,7 +106,7 @@ describe('DrizzleWebMentionStorage', () => {
 
   it('getMentionsForPage returns mentions for a specific page', async () => {
     const storage = new DrizzleWebMentionStorage(
-      db as any,
+      db as AnyDrizzleDb,
       mentions,
       pendingMentions,
     );
@@ -128,7 +131,7 @@ describe('DrizzleWebMentionStorage', () => {
 
   it('getMentionsForPage filters by type when provided', async () => {
     const storage = new DrizzleWebMentionStorage(
-      db as any,
+      db as AnyDrizzleDb,
       mentions,
       pendingMentions,
     );
@@ -173,7 +176,7 @@ describe('DrizzleWebMentionStorage', () => {
 
   it('storeMentionForPage stores a mention', async () => {
     const storage = new DrizzleWebMentionStorage(
-      db as any,
+      db as AnyDrizzleDb,
       mentions,
       pendingMentions,
     );
@@ -197,7 +200,7 @@ describe('DrizzleWebMentionStorage', () => {
 
   it('deleteMention returns null', async () => {
     const storage = new DrizzleWebMentionStorage(
-      db as any,
+      db as AnyDrizzleDb,
       mentions,
       pendingMentions,
     );
@@ -233,7 +236,7 @@ describe('DrizzleWebMentionStorage', () => {
     };
 
     const storageWithMockDb = new DrizzleWebMentionStorage(
-      mockDb as any,
+      mockDb as AnyDrizzleDb,
       mentions,
       pendingMentions,
     );

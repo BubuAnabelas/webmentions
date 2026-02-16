@@ -48,9 +48,10 @@ class Stmt implements Pick<D1PreparedStatement, 'bind' | 'run' | 'all'> {
 	) {}
 
 	bind(...values: unknown[]): D1PreparedStatement {
-		const out = new Stmt(this.stmt, values) as unknown as D1PreparedStatement;
-		// D1's .all() has overloaded return types; our stub implements the behavior used by tests
-		(out as unknown as { raw(): Promise<unknown[]> }).raw = async (): Promise<unknown[]> => {
+		const out = new Stmt(this.stmt, values) as unknown as D1PreparedStatement & {
+			raw: () => Promise<unknown[]>;
+		};
+		(out as any).raw = async (): Promise<unknown[]> => {
 			const rows = this.stmt.all(...values);
 			const arr = Array.isArray(rows) ? rows : [];
 			if (arr.length === 0) return arr;
@@ -59,7 +60,7 @@ class Stmt implements Pick<D1PreparedStatement, 'bind' | 'run' | 'all'> {
 				columns.map((col) => (row as Record<string, unknown>)[col])
 			);
 		};
-		return out;
+		return out as unknown as D1PreparedStatement;
 	}
 
 	async run<T = Record<string, unknown>>(): Promise<D1Result<T>> {

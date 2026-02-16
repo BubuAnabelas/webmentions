@@ -1,5 +1,8 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
-import { DrizzleWebMentionStorage } from 'webmentions-handler-drizzle';
+import {
+	DrizzleWebMentionStorage,
+	type AnyDrizzleDb,
+} from 'webmentions-handler-drizzle';
 import { WebMentionHandler, type WebMentionOptions } from 'webmention-handler';
 import { drizzle } from 'drizzle-orm/d1';
 import { and, eq } from 'drizzle-orm';
@@ -153,7 +156,7 @@ webmentionRoutes.openapi(
 			}
 
 			const storageHandler = new DrizzleWebMentionStorage(
-				db as never,
+				db as AnyDrizzleDb,
 				mentions,
 				pendingMentions
 			);
@@ -178,7 +181,7 @@ webmentionRoutes.openapi(
 				for (const [name, value] of Object.entries(recommendedResponse.headers)) {
 					headers.set(name, value);
 				}
-				return new Response(res.body, { status, headers }) as never;
+				return new Response(res.body, { status, headers }) as any;
 			}
 			return res;
 		} catch (error) {

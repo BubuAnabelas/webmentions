@@ -1,0 +1,20 @@
+name = "webmentions-worker"
+main = "src/index.ts"
+compatibility_date = "2026-01-01"
+
+# Production environment (default)
+[[d1_databases]]
+binding = "DB"
+database_name = "webmentions"
+database_id = "2f6c4d8a-892b-41f3-8e02-b0e6e29d98c8"
+migrations_dir = "migrations"
+
+# Staging environment
+[env.staging]
+name = "webmentions-worker-staging"
+
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "webmentions-staging"
+database_id = "c947c4b9-b091-42bb-a875-ff3370680523"
+migrations_dir = "migrations"

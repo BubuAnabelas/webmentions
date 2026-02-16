@@ -1,0 +1,109 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "WebMentions API",
+    "version": "1.0.0",
+    "description": "API for handling webmentions using Cloudflare Workers and D1"
+  },
+  "components": {
+    "schemas": {
+      "WebMentionResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "required": [
+          "success"
+        ]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "details": {
+            "type": "array",
+            "items": {}
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "WebMentionRequest": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "format": "uri"
+          },
+          "target": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "source",
+          "target"
+        ]
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {
+    "/wm": {
+      "post": {
+        "summary": "Create a new WebMention",
+        "description": "Submit a webmention with source and target URLs",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebMentionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "WebMention created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebMentionResponse"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "WebMention accepted (queued for processing)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebMentionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid webmention request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "webhooks": {}
+}

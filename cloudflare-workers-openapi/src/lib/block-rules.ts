@@ -45,7 +45,7 @@ export function matchesDomainPattern(
 
 /** Returns true if the block rule matches this source (domain and/or URL prefix). Mention-type is not checked here (applied when processing). */
 export function blockRuleMatchesSource(rule: BlockRuleRow, sourceUrl: string): boolean {
-	const r = rule as Record<string, unknown>;
+	const r = rule as unknown as Record<string, unknown>;
 	const sourceUrlPrefix = (r.sourceUrlPrefix ?? r.source_url_prefix) as string | null | undefined;
 	if (sourceUrlPrefix) {
 		const prefix = String(sourceUrlPrefix).trim();

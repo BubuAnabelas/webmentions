@@ -106,6 +106,28 @@ describe('WebMention E2E Compliance', () => {
 		});
 	});
 
+	// Spec 3.1 Sending Webmentions: "The sender MUST post x-www-form-urlencoded source and target parameters"
+	describe('3.1 Sending Webmentions', () => {
+		it('MUST accept x-www-form-urlencoded source and target parameters', async () => {
+			const request = new Request('http://localhost/', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+				body: new URLSearchParams({
+					source: 'https://example.com/post',
+					target: 'https://localhost/post',
+				}).toString(),
+			});
+
+			const response = await webmentionRoutes.fetch(request, env, createTestExecutionContext());
+			expect([201, 202]).toContain(response.status);
+
+			const { results } = await db.prepare('SELECT * FROM pendingMentions').all<PendingMentionRow>();
+			expect(results.length).toBe(1);
+			expect(results[0].source).toBe('https://example.com/post');
+			expect(results[0].target).toBe('https://localhost/post');
+		});
+	});
+
 	// Spec 3.2 Receiving Webmentions
 	describe('3.2 Receiving Webmentions', () => {
 		it('MUST respond with 201 Created or 202 Accepted on success', async () => {
@@ -212,6 +234,51 @@ describe('WebMention E2E Compliance', () => {
 			});
 			const response = await webmentionRoutes.fetch(request, env, createTestExecutionContext());
 			expect([201, 202]).toContain(response.status);
+		});
+	});
+
+	describe('GET / - list stored mentions (webmention.io-style)', () => {
+		it('returns stored mentions for a target', async () => {
+			await db.exec(
+				`INSERT INTO mentions (source, target, type, parsed) VALUES ('https://example.com/post', 'https://localhost/post', 'reply', ${Date.now()})`
+			);
+
+			const request = new Request('http://localhost/?target=https://localhost/post');
+			const response = await webmentionRoutes.fetch(request, env, createTestExecutionContext());
+			expect(response.status).toBe(200);
+			const body = (await response.json()) as { mentions: Array<{ source: string; target: string; type: string }> };
+			expect(body.mentions.length).toBe(1);
+			expect(body.mentions[0].source).toBe('https://example.com/post');
+			expect(body.mentions[0].type).toBe('reply');
+		});
+
+		it('filters by type when provided', async () => {
+			await db.exec(
+				`INSERT INTO mentions (source, target, type, parsed) VALUES ('https://example.com/a', 'https://localhost/post', 'like', ${Date.now()})`
+			);
+			await db.exec(
+				`INSERT INTO mentions (source, target, type, parsed) VALUES ('https://example.com/b', 'https://localhost/post', 'reply', ${Date.now()})`
+			);
+
+			const request = new Request('http://localhost/?target=https://localhost/post&type=like');
+			const response = await webmentionRoutes.fetch(request, env, createTestExecutionContext());
+			const body = (await response.json()) as { mentions: Array<{ type: string }> };
+			expect(body.mentions.length).toBe(1);
+			expect(body.mentions[0].type).toBe('like');
+		});
+
+		it('returns 400 for an invalid target', async () => {
+			const request = new Request('http://localhost/?target=not-a-url');
+			const response = await webmentionRoutes.fetch(request, env, createTestExecutionContext());
+			expect(response.status).toBe(400);
+		});
+
+		it('returns an empty list for a target with no mentions', async () => {
+			const request = new Request('http://localhost/?target=https://localhost/nothing-here');
+			const response = await webmentionRoutes.fetch(request, env, createTestExecutionContext());
+			expect(response.status).toBe(200);
+			const body = (await response.json()) as { mentions: unknown[] };
+			expect(body.mentions).toEqual([]);
 		});
 	});
 });

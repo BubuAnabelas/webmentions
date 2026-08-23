@@ -1,4 +1,5 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
+import { cors } from 'hono/cors';
 import {
 	DrizzleWebMentionStorage,
 	type AnyDrizzleDb,
@@ -10,6 +11,8 @@ import { mentions, pendingMentions, domains, blockRules, settings } from '../sch
 import {
 	WebMentionRequestSchema,
 	WebMentionResponseSchema,
+	MentionsQuerySchema,
+	MentionsResponseSchema,
 	ErrorResponseSchema,
 } from '../types';
 import { blockRuleMatchesSource } from '../lib/block-rules';
@@ -27,11 +30,24 @@ function normalizeHost(host: string): string {
 	return host.toLowerCase().replace(/^www\./, '');
 }
 
+function createStorageHandler(env: Env): DrizzleWebMentionStorage {
+	return new DrizzleWebMentionStorage(
+		drizzle(env.DB) as AnyDrizzleDb,
+		mentions,
+		pendingMentions
+	);
+}
+
 const webmentionRoutes = new OpenAPIHono<{ Bindings: Env }>();
 
 const webmentionRequestSchema = WebMentionRequestSchema;
 const webmentionResponseSchema = WebMentionResponseSchema;
+const mentionsQuerySchema = MentionsQuerySchema;
+const mentionsResponseSchema = MentionsResponseSchema;
 const errorResponseSchema = ErrorResponseSchema;
+
+// The mentions list is fetched client-side by the embeddable widget from arbitrary origins.
+webmentionRoutes.use('/', cors({ origin: '*', allowMethods: ['GET'] }));
 
 webmentionRoutes.openapi(
 	{
@@ -41,7 +57,11 @@ webmentionRoutes.openapi(
 		description: 'Submit a webmention with source and target URLs',
 		request: {
 			body: {
+				description: 'The spec requires x-www-form-urlencoded; JSON is also accepted.',
 				content: {
+					'application/x-www-form-urlencoded': {
+						schema: webmentionRequestSchema,
+					},
 					'application/json': {
 						schema: webmentionRequestSchema,
 					},
@@ -77,7 +97,9 @@ webmentionRoutes.openapi(
 	},
 	async (c) => {
 		try {
-			const { source, target } = c.req.valid('json');
+			const jsonBody = c.req.valid('json');
+			const formBody = c.req.valid('form');
+			const { source, target } = jsonBody.source ? jsonBody : formBody;
 
 			const db = drizzle(c.env.DB);
 			let supportedHosts: string[] = ['localhost'];
@@ -151,19 +173,15 @@ webmentionRoutes.openapi(
 						return c.json(errorBody, 400);
 					}
 				}
-			} catch {
-				// Domains table missing or query failed; use default localhost
+			} catch (error) {
+				// Falls back to localhost-only if lookups fail (e.g. migrations not yet applied),
+				// but still surface the error so a broken D1 binding doesn't fail silently.
+				console.error('webmention: domain/block-rule lookup failed, falling back to default hosts', error);
 			}
-
-			const storageHandler = new DrizzleWebMentionStorage(
-				db as AnyDrizzleDb,
-				mentions,
-				pendingMentions
-			);
 
 			const options: WebMentionOptions = {
 				supportedHosts,
-				storageHandler,
+				storageHandler: createStorageHandler(c.env),
 				requiredProtocol: 'https',
 			};
 
@@ -191,5 +209,53 @@ webmentionRoutes.openapi(
 		}
 	}
 );
+
+webmentionRoutes.openapi(
+	{
+		method: 'get',
+		path: '/',
+		summary: 'List stored WebMentions for a target',
+		description: 'Returns verified WebMentions for a target URL, like webmention.io\'s mentions API.',
+		request: {
+			query: mentionsQuerySchema,
+		},
+		responses: {
+			200: {
+				description: 'Stored WebMentions for the target',
+				content: {
+					'application/json': {
+						schema: mentionsResponseSchema,
+					},
+				},
+			},
+			400: {
+				description: 'Invalid target URL',
+				content: {
+					'application/json': {
+						schema: errorResponseSchema,
+					},
+				},
+			},
+		},
+	},
+	async (c) => {
+		const { target, type } = c.req.valid('query');
+		const webMentionHandler = new WebMentionHandler({
+			supportedHosts: [],
+			storageHandler: createStorageHandler(c.env),
+		});
+		const mentionsForPage = await webMentionHandler.getMentionsForPage(target, type);
+		return c.json(mentionsResponseSchema.parse({ mentions: mentionsForPage }), 200);
+	}
+);
+
+/** Fetches each pending mention's source, verifies it links to the target, and stores the result. */
+export async function processPendingWebMentions(env: Env): Promise<void> {
+	const webMentionHandler = new WebMentionHandler({
+		supportedHosts: [],
+		storageHandler: createStorageHandler(env),
+	});
+	await webMentionHandler.processPendingMentions();
+}
 
 export { webmentionRoutes };

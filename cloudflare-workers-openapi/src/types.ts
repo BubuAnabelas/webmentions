@@ -18,6 +18,33 @@ export const WebMentionResponseSchema = z
 
 export type WebMentionResponse = z.infer<typeof WebMentionResponseSchema>;
 
+export const MentionsQuerySchema = z
+	.object({
+		target: z.string().url('target must be a valid URL'),
+		type: z.string().optional(),
+	})
+	.openapi('MentionsQuery');
+
+export type MentionsQuery = z.infer<typeof MentionsQuerySchema>;
+
+/** A stored, verified mention. Extra microformats properties (author, content, published, ...) pass through untyped. */
+export const MentionSchema = z
+	.object({
+		source: z.string(),
+		target: z.string(),
+		type: z.string(),
+	})
+	.catchall(z.unknown())
+	.openapi('Mention');
+
+export const MentionsResponseSchema = z
+	.object({
+		mentions: z.array(MentionSchema),
+	})
+	.openapi('MentionsResponse');
+
+export type MentionsResponse = z.infer<typeof MentionsResponseSchema>;
+
 export const ErrorResponseSchema = z
 	.object({
 		error: z.string(),

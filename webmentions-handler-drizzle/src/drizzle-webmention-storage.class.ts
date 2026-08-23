@@ -35,6 +35,11 @@ export type AnyDrizzleDb = {
       where: (condition: unknown) => Promise<unknown>;
     };
   };
+  delete: <T extends typeof mentions | typeof pendingMentions>(
+    table: T,
+  ) => {
+    where: (condition: unknown) => Promise<unknown>;
+  };
 };
 
 export class DrizzleWebMentionStorage implements IWebMentionStorage {
@@ -98,7 +103,16 @@ export class DrizzleWebMentionStorage implements IWebMentionStorage {
   }
 
   async storeMentionForPage(_page: string, mention: Mention): Promise<Mention> {
-    await this.dbEngine.insert(this.mentionsTable).values(mention);
+    // mention carries arbitrary microformats2 properties (id, author, content, ...) alongside
+    // source/target/type/parsed; any of those can collide with a real column name (e.g. a
+    // source page's own `id` HTML attribute colliding with our integer primary key). Only
+    // pass the columns this table actually has.
+    await this.dbEngine.insert(this.mentionsTable).values({
+      source: mention.source,
+      target: mention.target,
+      type: mention.type,
+      parsed: mention.parsed,
+    });
 
     const storedMention = await this.dbEngine
       .select()
@@ -119,7 +133,15 @@ export class DrizzleWebMentionStorage implements IWebMentionStorage {
     return storedMention[0] as Mention;
   }
 
-  async deleteMention(_mention: SimpleMention): Promise<null> {
+  async deleteMention(mention: SimpleMention): Promise<null> {
+    await this.dbEngine
+      .delete(this.mentionsTable)
+      .where(
+        and(
+          eq(this.mentionsTable.source, mention.source),
+          eq(this.mentionsTable.target, mention.target),
+        ),
+      );
     return null;
   }
 }

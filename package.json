@@ -13,6 +13,9 @@
     "pnpm": ">=9"
   },
   "pnpm": {
-    "overrides": {}
+    "overrides": {},
+    "patchedDependencies": {
+      "webmention-handler@0.0.9": "patches/webmention-handler@0.0.9.patch"
+    }
   }
 }

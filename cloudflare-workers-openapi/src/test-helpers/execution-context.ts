@@ -9,5 +9,6 @@ export function createTestExecutionContext(): ExecutionContext {
 		get props() {
 			return {};
 		},
+		tracing: {} as ExecutionContext['tracing'],
 	};
 }

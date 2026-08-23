@@ -52,6 +52,40 @@
           "source",
           "target"
         ]
+      },
+      "MentionsResponse": {
+        "type": "object",
+        "properties": {
+          "mentions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Mention"
+            }
+          }
+        },
+        "required": [
+          "mentions"
+        ]
+      },
+      "Mention": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "target",
+          "type"
+        ],
+        "additionalProperties": {}
       }
     },
     "parameters": {}
@@ -62,7 +96,13 @@
         "summary": "Create a new WebMention",
         "description": "Submit a webmention with source and target URLs",
         "requestBody": {
+          "description": "The spec requires x-www-form-urlencoded; JSON is also accepted.",
           "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/WebMentionRequest"
+              }
+            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/WebMentionRequest"
@@ -93,6 +133,51 @@
           },
           "400": {
             "description": "Invalid webmention request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "List stored WebMentions for a target",
+        "description": "Returns verified WebMentions for a target URL, like webmention.io's mentions API.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uri"
+            },
+            "required": true,
+            "name": "target",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "type",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stored WebMentions for the target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MentionsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid target URL",
             "content": {
               "application/json": {
                 "schema": {

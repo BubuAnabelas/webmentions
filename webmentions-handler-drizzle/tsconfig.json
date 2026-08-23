@@ -4,7 +4,6 @@
     "target": "ES2022",
     "outDir": "build/main",
     "rootDir": "src",
-    "moduleResolution": "node",
     "module": "commonjs",
     "declaration": true,
     "inlineSourceMap": true,

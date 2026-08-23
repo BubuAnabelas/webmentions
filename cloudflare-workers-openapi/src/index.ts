@@ -1,6 +1,7 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
-import { webmentionRoutes } from './endpoints/webmention';
+import { webmentionRoutes, processPendingWebMentions } from './endpoints/webmention';
+import { landingPageHtml } from './public-site';
 
 export interface Env {
 	readonly DB: D1Database;
@@ -9,6 +10,8 @@ export interface Env {
 const app = new OpenAPIHono<{ Bindings: Env }>();
 
 app.route('/wm', webmentionRoutes);
+
+app.get('/', (c) => c.html(landingPageHtml(new URL(c.req.url).origin)));
 
 // Serve OpenAPI JSON spec
 app.get('/openapi.json', (c) => {
@@ -39,4 +42,7 @@ app.notFound((c) => {
 
 export default {
 	fetch: app.fetch,
+	scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
+		ctx.waitUntil(processPendingWebMentions(env));
+	},
 };

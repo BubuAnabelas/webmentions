@@ -198,21 +198,83 @@ describe('DrizzleWebMentionStorage', () => {
     expect(result.type).toBe(mention.type);
   });
 
-  it('deleteMention returns null', async () => {
+  it('storeMentionForPage ignores extra microformats2 properties that collide with real columns', async () => {
+    // Real-world h-entry pages often carry an HTML `id` attribute, which mf2 parsing
+    // surfaces as an `id` property on the mention. That must not collide with the
+    // mentions table's own integer primary key column.
     const storage = new DrizzleWebMentionStorage(
       db as AnyDrizzleDb,
       mentions,
       pendingMentions,
     );
 
-    const mention: SimpleMention = {
+    const mention = {
       source: 'https://example.com/post1',
       target: 'https://example.org/target1',
+      type: 'rsvp',
+      parsed: new Date(),
+      id: 'd139t1',
+      author: { type: 'h-card', name: 'Someone' },
+      content: { value: 'hello' },
+    } as unknown as Mention;
+
+    const result = await storage.storeMentionForPage(
+      'https://example.org/target1',
+      mention,
+    );
+
+    expect(result.source).toBe(mention.source);
+    expect(result.target).toBe(mention.target);
+    expect(result.type).toBe(mention.type);
+  });
+
+  it('deleteMention removes the stored mention for that source/target', async () => {
+    const storage = new DrizzleWebMentionStorage(
+      db as AnyDrizzleDb,
+      mentions,
+      pendingMentions,
+    );
+
+    const mention: Mention = {
+      source: 'https://example.com/post1',
+      target: 'https://example.org/target1',
+      type: 'reply',
+      parsed: new Date(),
     };
+    await storage.storeMentionForPage(mention.target, mention);
 
     const result = await storage.deleteMention(mention);
-
     expect(result).toBe(null);
+
+    const remaining = await storage.getMentionsForPage(mention.target);
+    expect(remaining.length).toBe(0);
+  });
+
+  it('deleteMention only removes mentions matching both source and target', async () => {
+    const storage = new DrizzleWebMentionStorage(
+      db as AnyDrizzleDb,
+      mentions,
+      pendingMentions,
+    );
+
+    const mention: Mention = {
+      source: 'https://example.com/post1',
+      target: 'https://example.org/target1',
+      type: 'reply',
+      parsed: new Date(),
+    };
+    const otherSource: Mention = {
+      ...mention,
+      source: 'https://example.com/other',
+    };
+    await storage.storeMentionForPage(mention.target, mention);
+    await storage.storeMentionForPage(otherSource.target, otherSource);
+
+    await storage.deleteMention(mention);
+
+    const remaining = await storage.getMentionsForPage(mention.target);
+    expect(remaining.length).toBe(1);
+    expect(remaining[0].source).toBe(otherSource.source);
   });
 
   it('storeMentionForPage throws error when mention cannot be found after insertion', async () => {
@@ -232,6 +294,9 @@ describe('DrizzleWebMentionStorage', () => {
         set: () => ({
           where: async () => ({}),
         }),
+      }),
+      delete: () => ({
+        where: async () => ({}),
       }),
     };
 

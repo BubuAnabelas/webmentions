@@ -135,6 +135,14 @@ describe('app', () => {
 		expect(text).toBeTruthy();
 	});
 
+	it('scheduled() processes pending mentions via ctx.waitUntil', async () => {
+		let waited: Promise<unknown> | undefined;
+		const ctx = { ...createTestExecutionContext(), waitUntil: (p: Promise<unknown>) => { waited = p; } };
+		worker.scheduled({} as ScheduledEvent, env, ctx);
+		expect(waited).toBeDefined();
+		await expect(waited).resolves.not.toThrow();
+	});
+
 	it('returns 404 JSON for unmatched routes', async () => {
 		const res = await worker.fetch(
 			new Request('http://localhost/unknown'),

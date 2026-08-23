@@ -8,13 +8,13 @@
 		"check": "tsc --noEmit"
 	},
 	"dependencies": {
-		"drizzle-orm": "^0.36.0",
-		"hono": "^4.6.0"
+		"drizzle-orm": "^0.36.4",
+		"hono": "^4.13.2"
 	},
 	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20241218.0",
-		"drizzle-kit": "^0.30.0",
+		"@cloudflare/workers-types": "^4.20260702.1",
+		"drizzle-kit": "^0.30.6",
 		"typescript": "^5.9.3",
-		"wrangler": "^3.96.0"
+		"wrangler": "^3.114.17"
 	}
 }

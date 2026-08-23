@@ -1,0 +1,37 @@
+diff --git a/dist/index.js b/dist/index.js
+index 352433895b28a67f6f1344696bf78ec84bc5d63f..5d30fb7d80414b308dcc4694b4b081addb5ef652 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -110,11 +110,11 @@ function isUrl(url) {
+ 
+ function getHtmlLinks(dom) {
+     // We only care about valid A tags as we want the linked urls
+-    const aTags = dom.querySelectorAll('a[href], img[href]');
+-    const imgTags = dom.querySelectorAll('img[src], video[src]');
++    const aTags = dom.querySelectorAll('a[href]');
++    const embedTags = dom.querySelectorAll('img[src], video[src], audio[src]');
+     return [
+         ...aTags.map(tag => tag.attributes.href),
+-        ...imgTags.map(tag => tag.attributes.src)
++        ...embedTags.map(tag => tag.attributes.src)
+     ];
+ }
+ 
+diff --git a/src/functions/get-html-links.function.ts b/src/functions/get-html-links.function.ts
+index 859ed42920d28db8bd2c7e5f994cbcc35bfbd336..ac20965eac9fee945a9e4f141f2929548ff074c5 100644
+--- a/src/functions/get-html-links.function.ts
++++ b/src/functions/get-html-links.function.ts
+@@ -2,10 +2,10 @@ import type { HTMLElement } from 'node-html-parser';
+ 
+ export function getHtmlLinks(dom: HTMLElement):string[] {
+   // We only care about valid A tags as we want the linked urls
+-  const aTags = dom.querySelectorAll('a[href], img[href]');
+-  const imgTags = dom.querySelectorAll('img[src], video[src]');
++  const aTags = dom.querySelectorAll('a[href]');
++  const embedTags = dom.querySelectorAll('img[src], video[src], audio[src]');
+   return [
+     ...aTags.map(tag => tag.attributes.href),
+-    ...imgTags.map(tag => tag.attributes.src)
++    ...embedTags.map(tag => tag.attributes.src)
+   ];
+ }

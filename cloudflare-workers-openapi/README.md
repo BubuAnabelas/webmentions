@@ -9,6 +9,14 @@ This is an example project made to be used as a quick start into building OpenAP
 
 ## Get started
 
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/BubuAnabelas/webmentions/tree/main/cloudflare-workers-openapi)
+
+Clicking the button forks this repo into your GitHub account, provisions a new D1 database bound to `DB`, runs migrations, and deploys the Worker. No secrets or extra env vars are required — the only binding is `DB`.
+
+> The [dashboard](../webmentions-dashboard) is a separate Worker that shares the same D1 database. Deploy it manually afterwards (`wrangler deploy` from `webmentions-dashboard/`) and point its `wrangler.toml` `database_id` at the database the button created.
+
+Or set it up manually:
+
 1. Sign up for [Cloudflare Workers](https://workers.dev). The free tier is more than enough for most use cases.
 2. Clone this project and install dependencies with `npm install`
 3. Run `wrangler login` to login to your Cloudflare account in wrangler

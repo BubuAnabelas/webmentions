@@ -139,3 +139,6 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Dashboard: unfinished, no auth on any route yet — kept local-only until secured
+webmentions-dashboard/

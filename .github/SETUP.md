@@ -15,15 +15,16 @@ This repository uses GitHub Actions to build, test, publish, and deploy the webm
 
 ### Deploy (`deploy.yml`)
 - **Trigger**: Push to `main` branch (only runs when relevant paths change)
-- **Purpose**: Deploy Cloudflare Worker and Dashboard to staging, then production
+- **Purpose**: Deploy Cloudflare Worker to staging, then production
 - **Environments**:
-  - **Staging**: `webmentions-worker-staging` and `webmentions-dashboard-staging` with shared `webmentions-staging` D1 database
-  - **Production**: `webmentions-worker` and dashboard (if configured) with `webmentions` D1 database
+  - **Staging**: `webmentions-worker-staging` with `webmentions-staging` D1 database
+  - **Production**: `webmentions-worker` with `webmentions` D1 database
 - **Steps** (staging):
   1. Build dependencies, run tests
   2. Apply D1 migrations to `webmentions-staging` (worker)
   3. Deploy Worker to staging
-  4. Deploy Dashboard to staging (same D1 binding)
+
+> The admin dashboard is developed locally only for now (no auth on its routes yet) and is intentionally excluded from CI/CD until it's finished.
 
 ### Publish (`publish.yml`)
 - **Trigger**: Git tags matching `webmentions-handler-drizzle-v*` or `v*`
@@ -62,12 +63,7 @@ cd cloudflare-workers-openapi
 wrangler d1 create webmentions-staging
 ```
 
-Copy the `database_id` from the output and replace `STAGING_DATABASE_ID_PLACEHOLDER` in **both**:
-
-1. **cloudflare-workers-openapi/wrangler.toml** (env.staging.d1_databases)
-2. **webmentions-dashboard/wrangler.toml** (env.staging.d1_databases)
-
-So the worker and dashboard share the same staging D1 database.
+Copy the `database_id` from the output and replace `STAGING_DATABASE_ID_PLACEHOLDER` in **cloudflare-workers-openapi/wrangler.toml** (env.staging.d1_databases).
 
 ### 2. Apply Initial Migrations
 

@@ -7,7 +7,6 @@ on:
     paths:
       - 'cloudflare-workers-openapi/**'
       - 'webmentions-handler-drizzle/**'
-      - 'webmentions-dashboard/**'
       - '.github/workflows/deploy.yml'
 
 jobs:
@@ -50,14 +49,6 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: cloudflare-workers-openapi
-          command: deploy --env staging
-
-      - name: Deploy Dashboard to Cloudflare Workers (staging)
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: webmentions-dashboard
           command: deploy --env staging
 
   deploy-production:
